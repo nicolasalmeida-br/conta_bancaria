@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conta Bancária</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<div class="container">
+    <h1>Sistema de Conta Bancária</h1>
+
+    <!-- Formulário de Cadastro -->
+    <section class="card">
+        <h2>Cadastrar Cliente</h2>
+        <form id="clienteForm">
+            <div class="form-row">
+                <label>Nome
+                    <input type="text" id="nome" required>
+                </label>
+                <label>CPF
+                    <input type="text" id="cpf" placeholder="Somente números" required>
+                </label>
+            </div>
+            <div class="form-row">
+                <label>Tipo de Conta
+                    <select id="tipoConta" required>
+                        <option value="">-- selecione --</option>
+                        <option value="Corrente">Corrente</option>
+                        <option value="Poupança">Poupança</option>
+                    </select>
+                </label>
+                <label>Saldo Inicial
+                    <input type="number" id="saldo" step="0.01" value="0">
+                </label>
+                <label>Status da Conta
+                    <select id="statusConta" required>
+                        <option value="">-- selecione --</option>
+                        <option value="Ativa">Ativa</option>
+                        <option value="Bloqueada">Bloqueada</option>
+                        <option value="Inativa">Inativa</option>
+                    </select>
+                </label>
+            </div>
+            <div class="form-actions">
+                <button type="submit" id="btnSubmit">Cadastrar</button>
+                <button type="button" id="btnCancelar" class="muted hidden">Cancelar</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Lista de Clientes -->
+    <section class="card clientes-list">
+        <div class="search-sort">
+            <input type="text" id="searchInput" placeholder="Pesquisar por nome ou CPF...">
+            <button id="sortNome">Ordenar Nome ⬍</button>
+            <button id="sortSaldo">Ordenar Saldo ⬍</button>
+        </div>
+
+        <h2>Clientes Cadastrados</h2>
+        <div id="alertContainer"></div>
+        <div id="clienteCards" class="cards-container"></div>
+    </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
