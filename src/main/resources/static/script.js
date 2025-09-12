@@ -10,10 +10,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const sortNomeBtn = document.getElementById("sortNome");
     const sortSaldoBtn = document.getElementById("sortSaldo");
 
-    let clientes = [];
+    let clientes = JSON.parse(localStorage.getItem("clientes") || "[]");
     let sortNomeAsc = true;
     let sortSaldoAsc = true;
     let editandoClienteId = null;
+
+    function salvarLocalStorage() {
+        localStorage.setItem("clientes", JSON.stringify(clientes));
+    }
 
     function formatarCPF(cpf) {
         cpf = cpf.toString().padStart(11, '0');
@@ -60,19 +64,20 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         if (editandoClienteId) {
-            // Atualiza cliente existente
             clientes = clientes.map(c => c.id === editandoClienteId ? clienteData : c);
         } else {
-            // Adiciona novo cliente
             clientes.push(clienteData);
         }
 
+        salvarLocalStorage();
         renderClientes(clientes);
         limparFormulario();
     });
 
     // Cancelar edição
-    document.getElementById("btnCancelar").addEventListener("click", limparFormulario);
+    document.getElementById("btnCancelar").addEventListener("click", () => {
+        limparFormulario();
+    });
 
     // Editar cliente
     window.editarCliente = function(id) {
@@ -92,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Excluir cliente
     window.excluirCliente = function(id) {
         clientes = clientes.filter(c => c.id !== id);
+        salvarLocalStorage();
         renderClientes(clientes);
     };
 
@@ -114,4 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const term = searchInput.value.toLowerCase();
         renderClientes(clientes.filter(c => c.nome.toLowerCase().includes(term) || c.cpf.includes(term)));
     });
+
+    // Render inicial
+    renderClientes(clientes);
 });
