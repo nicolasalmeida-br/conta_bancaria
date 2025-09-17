@@ -1,3 +1,4 @@
+<!-- src/main/resources/static/index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -27,7 +28,7 @@
                     <select id="tipoConta" required>
                         <option value="">-- selecione --</option>
                         <option value="Corrente">Corrente</option>
-                        <option value="Poupança">Poupança</option>
+                        <option value="Poupanca">Poupança</option>
                     </select>
                 </label>
                 <label>Saldo Inicial
@@ -40,6 +41,19 @@
                         <option value="Bloqueada">Bloqueada</option>
                         <option value="Inativa">Inativa</option>
                     </select>
+                </label>
+            </div>
+            <div class="form-row" id="correnteFields" style="display:none;">
+                <label>Limite
+                    <input type="number" id="limite" step="0.01" value="0">
+                </label>
+                <label>Taxa
+                    <input type="number" id="taxa" step="0.01" value="0">
+                </label>
+            </div>
+            <div class="form-row" id="poupancaFields" style="display:none;">
+                <label>Rendimento
+                    <input type="number" id="rendimento" step="0.01" value="0">
                 </label>
             </div>
             <div class="form-actions">

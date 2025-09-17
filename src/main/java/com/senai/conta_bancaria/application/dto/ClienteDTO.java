@@ -5,14 +5,14 @@ import com.senai.conta_bancaria.domain.entity.Cliente;
 import java.util.List;
 
 public record ClienteDTO(
-        Long id,
+        String id,
         String nome,
         String cpf,
-        List<Long> contasIds
+        List<String> contasIds
 ) {
     public static ClienteDTO fromEntity(Cliente cliente) {
         if (cliente == null) return null;
-        List<Long> ids = cliente.getContas() != null
+        List<String> ids = cliente.getContas() != null
                 ? cliente.getContas().stream().map(c -> c.getNumero()).toList()
                 : List.of();
         return new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getCpf(), ids);

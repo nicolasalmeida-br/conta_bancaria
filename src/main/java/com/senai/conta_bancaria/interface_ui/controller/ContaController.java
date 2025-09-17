@@ -13,12 +13,12 @@ public class ContaController {
     }
 
     @PostMapping("/{id}/depositar")
-    public void depositar(@PathVariable Long id, @RequestParam Double valor) {
+    public void depositar(@PathVariable String id, @RequestParam double valor) {
         contaService.depositar(id, valor);
     }
 
     @PostMapping("/{id}/sacar")
-    public void sacar(@PathVariable Long id, @RequestParam Double valor) {
+    public void sacar(@PathVariable String id, @RequestParam double valor) {
         contaService.sacar(id, valor);
     }
 }

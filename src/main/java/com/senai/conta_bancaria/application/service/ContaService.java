@@ -7,6 +7,7 @@ import com.senai.conta_bancaria.domain.entity.ContaCorrente;
 import com.senai.conta_bancaria.domain.entity.ContaPoupanca;
 import com.senai.conta_bancaria.domain.repository.ContaRepository;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
 
 @Service
 public class ContaService {
@@ -28,21 +29,23 @@ public class ContaService {
         return ContaPoupancaDTO.fromEntity(salvo);
     }
 
-    public void depositar(Long id, double valor) {
+    public void depositar(String id, double valor) {
         Conta conta = contaRepository.findById(id).orElseThrow();
-        conta.setSaldo(conta.getSaldo() + valor);
+        BigDecimal valorBD = BigDecimal.valueOf(valor);
+        conta.setSaldo(conta.getSaldo().add(valorBD));
         contaRepository.save(conta);
     }
 
-    public void sacar(Long id, double valor) {
+    public void sacar(String id, double valor) {
         Conta conta = contaRepository.findById(id).orElseThrow();
-        if (valor > 0 && conta.getSaldo() >= valor) {
-            conta.setSaldo(conta.getSaldo() - valor);
+        BigDecimal valorBD = BigDecimal.valueOf(valor);
+        if (valor > 0 && conta.getSaldo().compareTo(valorBD) >= 0) {
+            conta.setSaldo(conta.getSaldo().subtract(valorBD));
             contaRepository.save(conta);
         }
     }
 
-    public ContaCorrenteDTO buscarCorrente(Long id) {
+    public ContaCorrenteDTO buscarCorrente(String id) {
         Conta conta = contaRepository.findById(id).orElseThrow();
         if (conta instanceof ContaCorrente cc) {
             return ContaCorrenteDTO.fromEntity(cc);
@@ -50,7 +53,7 @@ public class ContaService {
         throw new RuntimeException("Conta não é do tipo corrente!");
     }
 
-    public ContaPoupancaDTO buscarPoupanca(Long id) {
+    public ContaPoupancaDTO buscarPoupanca(String id) {
         Conta conta = contaRepository.findById(id).orElseThrow();
         if (conta instanceof ContaPoupanca cp) {
             return ContaPoupancaDTO.fromEntity(cp);
