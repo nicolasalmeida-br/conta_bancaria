@@ -4,7 +4,7 @@ import com.senai.conta_bancaria.application.service.ContaService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/contas")
+@RequestMapping("/api/conta")
 public class ContaController {
     private final ContaService contaService;
 

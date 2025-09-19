@@ -1,27 +1,20 @@
 package com.senai.conta_bancaria.interface_ui.controller;
 
-import com.senai.conta_bancaria.application.dto.ClienteDTO;
+import com.senai.conta_bancaria.application.dto.ClienteRegistroDTO;
+import com.senai.conta_bancaria.application.dto.ClienteResponseDTO;
 import com.senai.conta_bancaria.application.service.ClienteService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/clientes")
+@RequestMapping("/api/cliente")
+@RequiredArgsConstructor
 public class ClienteController {
-    private final ClienteService clienteService;
-
-    public ClienteController(ClienteService clienteService) {
-        this.clienteService = clienteService;
-    }
+    private final ClienteService service;
 
     @PostMapping
-    public ClienteDTO criar(@RequestBody ClienteDTO dto) {
-        return clienteService.salvar(dto);
+    public ClienteResponseDTO registrarCliente(@RequestBody ClienteRegistroDTO dto) {
+        return service.registrarClienteOuAnexarConta(dto);
     }
 
-    @GetMapping
-    public List<ClienteDTO> listar() {
-        return clienteService.listarTodos();
-    }
 }
