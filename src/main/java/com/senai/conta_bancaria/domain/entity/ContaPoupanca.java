@@ -11,12 +11,17 @@ import java.math.BigDecimal;
 
 @Entity
 @Data
-@DiscriminatorValue("Poupança")
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 @SuperBuilder
+@NoArgsConstructor
+@DiscriminatorValue("POUPANCA")
 public class ContaPoupanca extends Conta {
 
-    @Column(precision = 10, scale = 4)
+    @Column(precision = 5)
     private BigDecimal rendimento;
+
+    @Override
+    public String getTipo() {
+        return "POUPANCA";
+    }
 }

@@ -10,16 +10,21 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Entity
+@DiscriminatorValue("CORRENTE")
 @Data
-@DiscriminatorValue("Corrente")
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 @SuperBuilder
+@NoArgsConstructor
 public class ContaCorrente extends Conta {
 
-    @Column(precision = 19, scale = 2, nullable = false)
+    @Column(precision = 4)
     private BigDecimal limite;
 
-    @Column(precision = 19, scale = 2, nullable = false)
+    @Column(precision = 5)
     private BigDecimal taxa;
+
+    @Override
+    public String getTipo() {
+        return "CORRENTE";
+    }
 }
