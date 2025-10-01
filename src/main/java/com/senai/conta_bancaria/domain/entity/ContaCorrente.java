@@ -18,13 +18,26 @@ import lombok.experimental.SuperBuilder;
 public class ContaCorrente extends Conta {
 
     @Column(precision = 4)
-    private BigDecimal limite;
+    private BigDecimal limite = new BigDecimal("500.00");
 
     @Column(precision = 5)
-    private BigDecimal taxa;
+    private BigDecimal taxa = new BigDecimal("0.05");
 
     @Override
     public String getTipo() {
         return "CORRENTE";
+    }
+
+    @Override
+    public void sacar(BigDecimal valor) {
+        validarValorMaiorQueZero(valor);
+
+        BigDecimal custoSaque = valor.multiply(taxa);
+        BigDecimal totalSaque = valor.add(custoSaque);
+
+        if (getSaldo().add(limite).compareTo(totalSaque) < 0) {
+            throw new IllegalArgumentException("Saldo insuficiente para o saque.");
+        }
+        setSaldo(getSaldo().subtract(valor));
     }
 }
