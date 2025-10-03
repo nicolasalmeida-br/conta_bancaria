@@ -1,5 +1,6 @@
 package com.senai.conta_bancaria.domain.entity;
 
+import com.senai.conta_bancaria.domain.exceptions.SaldoInsuficienteException;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -16,12 +17,11 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 public class ContaCorrente extends Conta {
+    @Column(precision = 19, scale = 2)
+    private BigDecimal limite;
 
-    @Column(precision = 4)
-    private BigDecimal limite = new BigDecimal("500.00");
-
-    @Column(precision = 5)
-    private BigDecimal taxa = new BigDecimal("0.05");
+    @Column(precision = 19, scale = 4)
+    private BigDecimal taxa;
 
     @Override
     public String getTipo() {
@@ -30,13 +30,13 @@ public class ContaCorrente extends Conta {
 
     @Override
     public void sacar(BigDecimal valor) {
-        validarValorMaiorQueZero(valor);
+        validarValorMaiorQueZero(valor, "saque");
 
         BigDecimal custoSaque = valor.multiply(taxa);
         BigDecimal totalSaque = valor.add(custoSaque);
 
         if (getSaldo().add(limite).compareTo(totalSaque) < 0) {
-            throw new IllegalArgumentException("Saldo insuficiente para o saque.");
+            throw new SaldoInsuficienteException();
         }
         setSaldo(getSaldo().subtract(valor));
     }

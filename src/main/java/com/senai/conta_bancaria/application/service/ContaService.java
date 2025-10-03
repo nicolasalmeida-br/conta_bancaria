@@ -7,12 +7,13 @@ import com.senai.conta_bancaria.application.dto.ValorSaqueDepositoDTO;
 import com.senai.conta_bancaria.domain.entity.Conta;
 import com.senai.conta_bancaria.domain.entity.ContaCorrente;
 import com.senai.conta_bancaria.domain.entity.ContaPoupanca;
+import com.senai.conta_bancaria.domain.exceptions.EntidadeNaoEncontradaException;
+import com.senai.conta_bancaria.domain.exceptions.RendimentoInvalidoException;
 import com.senai.conta_bancaria.domain.repository.ContaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -32,7 +33,7 @@ public class ContaService {
     public ContaResumoDTO buscarContaPorNumero(String numero) {
         return ContaResumoDTO.fromEntity(
                 repository.findByNumeroAndAtivaTrue(numero)
-                        .orElseThrow(() -> new RuntimeException("Conta não encontrada"))
+                        .orElseThrow(() -> new EntidadeNaoEncontradaException("Conta"))
         );
     }
 
@@ -59,7 +60,7 @@ public class ContaService {
 
     private Conta buscarContaAtivaPorNumero(String numero) {
         return repository.findByNumeroAndAtivaTrue(numero)
-            .orElseThrow(() -> new RuntimeException("Conta não encontrada.")
+            .orElseThrow(() -> new EntidadeNaoEncontradaException("Conta")
         );
     }
 
@@ -85,5 +86,15 @@ public class ContaService {
 
         repository.save(contaDestino);
         return ContaResumoDTO.fromEntity(repository.save(contaOrigem));
+    }
+
+    public ContaResumoDTO aplicarRendimento(String numero) {
+        var conta = buscarContaAtivaPorNumero(numero);
+
+        if (conta instanceof ContaPoupanca poupanca) {
+            poupanca.aplicarRendimento();
+            return ContaResumoDTO.fromEntity(repository.save(poupanca));
+        }
+        throw new RendimentoInvalidoException();
     }
 }

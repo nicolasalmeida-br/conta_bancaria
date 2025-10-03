@@ -16,12 +16,16 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @DiscriminatorValue("POUPANCA")
 public class ContaPoupanca extends Conta {
-
-    @Column(precision = 5)
+    @Column(precision = 10, scale=2)
     private BigDecimal rendimento;
 
     @Override
     public String getTipo() {
         return "POUPANCA";
+    }
+
+    public void aplicarRendimento() {
+        var rendimentoCalculado = getSaldo().multiply(rendimento);
+        setSaldo(getSaldo().add(rendimentoCalculado));
     }
 }
