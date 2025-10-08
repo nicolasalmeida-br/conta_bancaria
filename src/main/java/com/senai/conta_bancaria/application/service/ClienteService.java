@@ -1,6 +1,8 @@
 package com.senai.conta_bancaria.application.service;
 
 import com.senai.conta_bancaria.application.dto.ClienteRegistroDTO;
+import com.senai.conta_bancaria.domain.entity.Cliente;
+import com.senai.conta_bancaria.domain.exceptions.ContaMesmoTipoException;
 import com.senai.conta_bancaria.application.dto.ClienteResponseDTO;
 import com.senai.conta_bancaria.domain.exceptions.EntidadeNaoEncontradaException;
 import com.senai.conta_bancaria.domain.repository.ClienteRepository;
@@ -12,7 +14,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ClienteService {
-
     private final ClienteRepository repository;
 
     public ClienteResponseDTO registarClienteOuAnexarConta(ClienteRegistroDTO dto) {
@@ -27,7 +28,7 @@ public class ClienteService {
                 .anyMatch(c -> c.getClass().equals(novaConta.getClass()) && c.isAtiva());
 
         if(jaTemTipo)
-            throw new RuntimeException("Cliente já possui uma conta ativa deste tipo.");
+            throw new ContaMesmoTipoException();
 
         cliente.getContas().add(novaConta);
 
@@ -41,16 +42,12 @@ public class ClienteService {
     }
 
     public ClienteResponseDTO buscarClienteAtivoPorCpf(String cpf) {
-        var cliente = repository.findByCpfAndAtivoTrue(cpf)
-                .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente")
-        );
+        var cliente = buscarPorCpfClienteAtivo(cpf);
         return ClienteResponseDTO.fromEntity(cliente);
     }
 
     public ClienteResponseDTO atualizarCliente(String cpf, ClienteRegistroDTO dto) {
-        var cliente = repository.findByCpfAndAtivoTrue(cpf)
-                .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente")
-        );
+        var cliente = buscarPorCpfClienteAtivo(cpf);
 
         cliente.setNome(dto.nome());
         cliente.setCpf(dto.cpf());
@@ -59,13 +56,19 @@ public class ClienteService {
     }
 
     public void deletarCliente(String cpf) {
-        var cliente = repository.findByCpfAndAtivoTrue(cpf)
-                .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente")
-        );
+        var cliente = buscarPorCpfClienteAtivo(cpf);
 
         cliente.setAtivo(false);
-        cliente.getContas().forEach(conta -> conta.setAtiva(false));
-
+        cliente.getContas().forEach(
+                conta -> conta.setAtiva(false)
+        );
         repository.save(cliente);
+    }
+
+    private Cliente buscarPorCpfClienteAtivo(String cpf) {
+        var cliente = repository.findByCpfAndAtivoTrue(cpf).orElseThrow(
+                () -> new EntidadeNaoEncontradaException("Cliente")
+        );
+        return cliente;
     }
 }

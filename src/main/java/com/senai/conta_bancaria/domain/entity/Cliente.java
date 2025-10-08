@@ -12,18 +12,19 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "cliente",
-        uniqueConstraints = {
-                @UniqueConstraint( columnNames = "cpf")
-        }
+@Table(
+        name = "cliente",
+        uniqueConstraints = @UniqueConstraint(name = "uk_cliente_cpf", columnNames = "cpf")
 )
-public  class Cliente {
+public class Cliente {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @Column(nullable = false, length = 120)
     private String nome;
+
     @Column(nullable = false, length = 11)
     private String cpf;
 
@@ -32,4 +33,5 @@ public  class Cliente {
 
     @Column(nullable = false)
     private Boolean ativo;
+
 }
