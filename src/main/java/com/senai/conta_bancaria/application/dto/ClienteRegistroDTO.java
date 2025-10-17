@@ -1,8 +1,8 @@
 package com.senai.conta_bancaria.application.dto;
 
 import com.senai.conta_bancaria.domain.entity.Cliente;
+import com.senai.conta_bancaria.domain.enums.Role;
 import jakarta.validation.Valid;
-import org.hibernate.validator.constraints.br.CPF;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
@@ -11,8 +11,14 @@ public record ClienteRegistroDTO(
         @NotBlank(message = "Nome é obrigatório.")
         String nome,
 
-        @CPF(message = "O CPF fornecido não é válido.")
+        @NotBlank
         String cpf,
+
+        @NotBlank
+        String email,
+
+        @NotBlank
+        String senha,
 
         @Valid
         ContaResumoDTO contaDTO
@@ -22,6 +28,9 @@ public record ClienteRegistroDTO(
                 .ativo(true)
                 .nome(this.nome)
                 .cpf(this.cpf)
+                .email(this.email)
+                .senha(this.senha)
+                .role(Role.CLIENTE)
                 .contas(new ArrayList<>())
                 .build();
     }

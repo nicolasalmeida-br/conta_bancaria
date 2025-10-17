@@ -14,6 +14,12 @@ public record ClienteResponseDTO(
         @Size(min = 3, max = 100, message = "Nome deve ter entre 3 e 100 caracteres")
         String nome,
 
+        @NotBlank(message = "E-mail não pode ser vazio")
+        String email,
+
+        @NotBlank(message = "E-mail não pode ser vazio")
+        String senha,
+
         @NotBlank(message = "CPF não pode ser vazio")
         @CPF(message = "O CPF fornecido não é válido")
         String cpf,
@@ -27,6 +33,8 @@ public record ClienteResponseDTO(
         return new ClienteResponseDTO(
                 cliente.getId(),
                 cliente.getNome(),
+                cliente.getEmail(),
+                cliente.getSenha(),
                 cliente.getCpf(),
                 contas
         );

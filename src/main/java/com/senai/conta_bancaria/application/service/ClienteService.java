@@ -7,14 +7,19 @@ import com.senai.conta_bancaria.application.dto.ClienteResponseDTO;
 import com.senai.conta_bancaria.domain.exceptions.EntidadeNaoEncontradaException;
 import com.senai.conta_bancaria.domain.repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ClienteService {
     private final ClienteRepository repository;
+    private final PasswordEncoder passwordEncoder;
+
 
     public ClienteResponseDTO registarClienteOuAnexarConta(ClienteRegistroDTO dto) {
         var cliente = repository.findByCpfAndAtivoTrue(dto.cpf()).orElseGet(
@@ -31,6 +36,8 @@ public class ClienteService {
             throw new ContaMesmoTipoException();
 
         cliente.getContas().add(novaConta);
+
+        cliente.setSenha(passwordEncoder.encode(dto.senha()));
 
         return ClienteResponseDTO.fromEntity(repository.save(cliente));
     }

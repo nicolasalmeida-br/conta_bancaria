@@ -6,6 +6,7 @@ import com.senai.conta_bancaria.application.service.ClienteService;
 import jakarta.validation.Valid; // Importante!
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/cliente")
 @RequiredArgsConstructor
+@Transactional
 public class ClienteController {
     private final ClienteService service;
 

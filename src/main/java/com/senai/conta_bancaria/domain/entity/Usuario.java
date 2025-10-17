@@ -27,7 +27,6 @@ public abstract class Usuario {
     @Column(nullable = false)
     protected String nome;
 
-    @NotBlank
     @Column(nullable = false, unique = true, length = 14)
     protected String cpf; // formato "000.000.000-00" (validação pode ser ampliada)
 

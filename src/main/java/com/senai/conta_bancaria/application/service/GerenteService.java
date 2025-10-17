@@ -19,7 +19,7 @@ public class GerenteService {
 
     private final PasswordEncoder encoder;
 
-    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")
     public List<GerenteDTO> listarTodosGerentes() {
         return gerenteRepository.findAll().stream()
                 .map(GerenteDTO::fromEntity)
@@ -31,7 +31,7 @@ public class GerenteService {
     public GerenteDTO cadastrarGerente(GerenteDTO dto) {
         Gerente entity = dto.toEntity();
         entity.setSenha(encoder.encode(dto.senha()));
-        entity.setRole(Role.GERENTE);
+        entity.setRole(Role.CLIENTE);
         gerenteRepository.save(entity);
         return GerenteDTO.fromEntity(entity);
     }
