@@ -99,4 +99,25 @@ public class GlobalExceptionHandler {
         problem.setProperty("errors", errors);
         return problem;
     }
+
+    @ExceptionHandler(SaldoInsuficienteException.class)
+    public ResponseEntity<ProblemDetail> handleSaldo(SaldoInsuficienteException ex){
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        pd.setTitle("Saldo Insuficiente");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
+    }
+
+    @ExceptionHandler(AutenticacaoIoTExpiradaException.class)
+    public ResponseEntity<ProblemDetail> handleIoT(AutenticacaoIoTExpiradaException ex){
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        pd.setTitle("Autenticação IoT Expirada");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd);
+    }
+
+    @ExceptionHandler(PagamentoInvalidoException.class)
+    public ResponseEntity<ProblemDetail> handlePagamento(PagamentoInvalidoException ex){
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        pd.setTitle("Pagamento Inválido");
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(pd);
+    }
 }

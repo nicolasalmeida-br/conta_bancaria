@@ -119,4 +119,10 @@ public class ClienteService {
         return repository.findByCpfAndAtivoTrue(cpf)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente"));
     }
+
+    @Transactional(readOnly = true)
+    public Cliente buscarPorId(String id) {
+        return repository.findByIdAndAtivoTrue(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente"));
+    }
 }

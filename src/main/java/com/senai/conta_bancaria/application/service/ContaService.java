@@ -28,6 +28,16 @@ public class ContaService {
     private final ContaRepository repository;
 
     /**
+     * ✅ NOVO: Busca uma conta ATIVA pelo seu ID (UUID).
+     * Usado por fluxos internos (ex.: pagamentos/IoT).
+     */
+    @Transactional(readOnly = true)
+    public Conta buscarPorId(String id) {
+        return repository.findByIdAndAtivaTrue(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Conta"));
+    }
+
+    /**
      * Lista todas as contas ativas no sistema.
      *
      * @return Lista de DTOs resumidos das contas ativas
@@ -88,11 +98,7 @@ public class ContaService {
     }
 
     /**
-     * Busca uma conta ativa pelo número.
-     *
-     * @param numeroDaConta Número da conta
-     * @return Conta encontrada
-     * @throws EntidadeNaoEncontradaException se a conta não estiver ativa ou não existir
+     * Busca uma conta ativa pelo número (uso interno).
      */
     private Conta buscaContaAtivaPorNumero(String numeroDaConta) {
         return repository.findByNumeroAndAtivaTrue(numeroDaConta)
@@ -101,10 +107,6 @@ public class ContaService {
 
     /**
      * Realiza um saque em uma conta.
-     *
-     * @param numeroConta Número da conta
-     * @param dto DTO contendo o valor do saque
-     * @return DTO resumido da conta após o saque
      */
     public ContaResumoDTO sacar(String numeroConta, ValorSaqueDepositoDTO dto) {
         var conta = buscaContaAtivaPorNumero(numeroConta);
@@ -114,10 +116,6 @@ public class ContaService {
 
     /**
      * Realiza um depósito em uma conta.
-     *
-     * @param numeroConta Número da conta
-     * @param dto DTO contendo o valor do depósito
-     * @return DTO resumido da conta após o depósito
      */
     public ContaResumoDTO depositar(String numeroConta, ValorSaqueDepositoDTO dto) {
         var conta = buscaContaAtivaPorNumero(numeroConta);
@@ -127,10 +125,6 @@ public class ContaService {
 
     /**
      * Realiza uma transferência entre duas contas ativas.
-     *
-     * @param numeroConta Número da conta de origem
-     * @param dto DTO contendo valor da transferência e conta destino
-     * @return DTO resumido da conta de origem após a transferência
      */
     public ContaResumoDTO transferir(String numeroConta, TransferenciaDTO dto) {
         var contaOrigem = buscaContaAtivaPorNumero(numeroConta);
@@ -144,10 +138,6 @@ public class ContaService {
 
     /**
      * Aplica rendimento em uma conta poupança.
-     *
-     * @param numeroDaConta Número da conta poupança
-     * @return DTO resumido da conta após aplicação do rendimento
-     * @throws RendimentoInvalidoException se a conta não for do tipo poupança
      */
     public ContaResumoDTO aplicarRendimento(String numeroDaConta) {
         var conta = buscaContaAtivaPorNumero(numeroDaConta);
