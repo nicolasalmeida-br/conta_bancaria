@@ -21,31 +21,23 @@ public class PagamentoController {
         this.pagamentos = pagamentos;
     }
 
-    // === Início da autenticação IoT ===
-    // IDs como String (UUID)
-    public static record IniciarAuthRequest(String clienteId) {}
-    public static record IniciarAuthResponse(Long authId, String status) {}
-
-    @PostMapping("/iniciar")
+    /**
+     * Inicia a autenticação via dispositivo IoT para o cliente.
+     * Gera um código, salva no banco e envia via MQTT (banco/autenticacao/{clienteId}).
+     */
+    @PostMapping("/autenticacao")
     @PreAuthorize("hasRole('CLIENTE')")
-    public ResponseEntity<IniciarAuthResponse> iniciar(@RequestBody IniciarAuthRequest req){
-        var auth = pagamentos.iniciarAutenticacao(req.clienteId());
-        return ResponseEntity.ok(new IniciarAuthResponse(auth.getId(), "AUTENTICACAO_PENDENTE"));
+    public ResponseEntity<?> iniciarAutenticacao(@RequestBody IniciarAutenticacaoRequest req) {
+        var auth = pagamentos.iniciarAutenticacao(req.clienteId);
+        return ResponseEntity.ok(auth);
     }
 
-    // === Confirmação de pagamento ===
-    public static class ConfirmarPagamentoRequest {
-        public String contaId;
-        public String clienteId;
-        public String boleto;
-        public String dataVencimento;
-        public BigDecimal valorPrincipal;
-        public List<Long> taxaIds;
-    }
-
+    /**
+     * Confirma o pagamento após a autenticação IoT ter sido validada.
+     */
     @PostMapping("/confirmar")
     @PreAuthorize("hasRole('CLIENTE')")
-    public ResponseEntity<?> confirmar(@RequestBody ConfirmarPagamentoRequest req){
+    public ResponseEntity<?> confirmar(@RequestBody ConfirmarPagamentoRequest req) {
         return ResponseEntity.ok(
                 pagamentos.confirmarPagamento(
                         req.contaId,
@@ -58,5 +50,20 @@ public class PagamentoController {
                         req.taxaIds
                 )
         );
+    }
+
+    // ===================== DTOs de request (simples) =====================
+
+    public static class IniciarAutenticacaoRequest {
+        public String clienteId;
+    }
+
+    public static class ConfirmarPagamentoRequest {
+        public String contaId;
+        public String clienteId;
+        public String boleto;
+        public String dataVencimento;   // formato: yyyy-MM-dd
+        public BigDecimal valorPrincipal;
+        public List<Long> taxaIds;
     }
 }

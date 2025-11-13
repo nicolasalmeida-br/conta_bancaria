@@ -1,24 +1,44 @@
 package com.senai.conta_bancaria.infrastructure.mqtt;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MqttConfig {
 
-    @Bean
-    public MqttClient mqttClient() throws Exception {
-        String broker = System.getProperty("mqtt.broker", "tcp://localhost:1883");
-        String clientId = "banco-backend-" + System.currentTimeMillis();
-        MqttClient client = new MqttClient(broker, clientId, new MemoryPersistence());
-        client.connect();
-        return client;
-    }
+    @Value("${mqtt.broker:tcp://localhost:1883}")
+    private String broker;
+
+    @Value("${mqtt.clientId:conta-bancaria-backend}")
+    private String clientId;
+
+    @Value("${mqtt.username:}")
+    private String username;
+
+    @Value("${mqtt.password:}")
+    private String password;
 
     @Bean
-    public MqttGateway mqttGateway(MqttClient client){
-        return new MqttGateway(client);
+    public MqttClient mqttClient() throws Exception {
+        MqttClient client = new MqttClient(broker, clientId + "-" + System.currentTimeMillis(), new MemoryPersistence());
+
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setAutomaticReconnect(true);
+        options.setCleanSession(true);
+
+        if (!username.isEmpty()) {
+            options.setUserName(username);
+        }
+        if (!password.isEmpty()) {
+            options.setPassword(password.toCharArray());
+        }
+
+        client.connect(options);
+        System.out.println("MQTT conectado ao broker: " + broker);
+        return client;
     }
 }

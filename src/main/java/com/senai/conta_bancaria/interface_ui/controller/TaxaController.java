@@ -22,13 +22,13 @@ public class TaxaController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('GERENTE')")
+    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
     public List<Taxa> listar() {
         return repo.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('GERENTE')")
+    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
     public ResponseEntity<Taxa> buscar(@PathVariable Long id) {
         return repo.findById(id)
                 .map(ResponseEntity::ok)
@@ -36,14 +36,14 @@ public class TaxaController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('GERENTE')")
+    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
     public ResponseEntity<Taxa> criar(@RequestBody Taxa dto) {
         Taxa salvo = repo.save(dto);
         return ResponseEntity.created(URI.create("/taxas/" + salvo.getId())).body(salvo);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('GERENTE')")
+    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
     public ResponseEntity<Taxa> atualizar(@PathVariable Long id, @RequestBody Taxa dto) {
         return repo.findById(id)
                 .map(existente -> {
@@ -56,7 +56,7 @@ public class TaxaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('GERENTE')")
+    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
     public ResponseEntity<Void> remover(@PathVariable Long id) {
         if (!repo.existsById(id)) return ResponseEntity.notFound().build();
         repo.deleteById(id);
