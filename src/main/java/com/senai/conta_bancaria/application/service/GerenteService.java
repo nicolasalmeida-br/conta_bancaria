@@ -23,7 +23,7 @@ public class GerenteService {
     private final GerenteRepository gerenteRepository;
     private final PasswordEncoder encoder;
 
-    @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public List<GerenteDTO> listarTodosGerentes() {
         return gerenteRepository.findAll().stream()
                 .map(GerenteDTO::fromEntity)
@@ -45,7 +45,7 @@ public class GerenteService {
         return GerenteDTO.fromEntity(entity);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     public GerenteDTO buscarGerentePorId(String id) {
         Gerente gerente = gerenteRepository.findById(id)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Gerente"));

@@ -36,6 +36,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/conta/**").hasAnyRole("CLIENTE")
                         .requestMatchers(HttpMethod.DELETE, "/api/conta/**").hasAnyRole("CLIENTE")
 
+                        // Taxa endpoints
+                        .requestMatchers(HttpMethod.POST, "/taxas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/taxas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/taxas/**").hasRole("ADMIN")
+
+                        // Taxa endpoints
+                        .requestMatchers(HttpMethod.POST, "/pagamentos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/conta/**").hasAnyRole("ADMIN", "CLIENTE")
+
                         // Demais endpoints precisam autenticação
                         .anyRequest().authenticated()
                 )

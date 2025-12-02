@@ -245,7 +245,7 @@ public class ContaController {
                             schema = @Schema(implementation = TransferenciaDTO.class),
                             examples = @ExampleObject(name = "Exemplo de transferência", value = """
                                     {
-                                      "numeroContaDestino": "98765-4",
+                                      "contaDestino": "987654",
                                       "valor": 300.00
                                     }
                             """)

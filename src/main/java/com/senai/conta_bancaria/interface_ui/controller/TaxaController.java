@@ -1,8 +1,10 @@
 package com.senai.conta_bancaria.interface_ui.controller;
 
+import com.senai.conta_bancaria.application.dto.TaxaDTO;
 import com.senai.conta_bancaria.domain.entity.Taxa;
 import com.senai.conta_bancaria.domain.repository.TaxaRepository;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -37,20 +39,26 @@ public class TaxaController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
-    public ResponseEntity<Taxa> criar(@RequestBody Taxa dto) {
-        Taxa salvo = repo.save(dto);
+    public ResponseEntity<Taxa> criar(@Valid @RequestBody TaxaDTO dto) {
+        Taxa taxa = new Taxa();
+        taxa.setDescricao(dto.descricao());
+        taxa.setPercentual(dto.percentual());
+        taxa.setValorFixo(dto.valorFixo());
+
+        Taxa salvo = repo.save(taxa);
         return ResponseEntity.created(URI.create("/taxas/" + salvo.getId())).body(salvo);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
-    public ResponseEntity<Taxa> atualizar(@PathVariable Long id, @RequestBody Taxa dto) {
+    public ResponseEntity<Taxa> atualizar(@PathVariable Long id, @Valid @RequestBody TaxaDTO dto) {
         return repo.findById(id)
                 .map(existente -> {
-                    existente.setDescricao(dto.getDescricao());
-                    existente.setPercentual(dto.getPercentual());
-                    existente.setValorFixo(dto.getValorFixo());
-                    return ResponseEntity.ok(repo.save(existente));
+                    existente.setDescricao(dto.descricao());
+                    existente.setPercentual(dto.percentual());
+                    existente.setValorFixo(dto.valorFixo());
+                    Taxa atualizado = repo.save(existente);
+                    return ResponseEntity.ok(atualizado);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
