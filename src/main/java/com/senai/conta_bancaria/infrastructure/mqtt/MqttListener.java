@@ -7,12 +7,13 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.stereotype.Component;
 
 /**
- * Listener MQTT que recebe a validação do dispositivo IoT.
+ * Listener MQTT que recebe validações do dispositivo IoT.
  *
  * Fluxo:
- * 1) Backend publica em banco/autenticacao/{clienteId} → "CODE:XXXXXX"
- * 2) Dispositivo IoT recebe, autentica digital e publica em banco/validacao/{clienteId} → "CODE:XXXXXX"
- * 3) Este listener recebe e chama PagamentoAppService.validarCodigo(clienteId, codigo)
+ * 1) Backend publica em: banco/autenticacao/{clienteId} → "CODE:XXXXXX"
+ * 2) Dispositivo IoT responde em: banco/validacao/{clienteId} → "CODE:XXXXXX"
+ * 3) Este listener recebe a validação e chama:
+ *        pagamentoAppService.validarCodigo(clienteId, codigo)
  */
 @Component
 public class MqttListener {
@@ -27,33 +28,47 @@ public class MqttListener {
 
     @PostConstruct
     public void init() throws MqttException {
+
         if (!client.isConnected()) {
             client.connect();
         }
 
-        // Assina todos os tópicos: banco/validacao/{clienteId}
+        // Assina: banco/validacao/{clienteId}
         client.subscribe("banco/validacao/+", (topic, message) -> {
             try {
-                // Exemplo de tópico: banco/validacao/1
+                System.out.println("[MQTT] Mensagem recebida no tópico: " + topic);
+
                 String[] parts = topic.split("/");
-                if (parts.length < 3) {
-                    return; // formato inesperado
+
+                // Tópico esperado → banco / validacao / {clienteId}
+                if (parts.length != 3) {
+                    System.err.println("[MQTT] Tópico fora do formato esperado.");
+                    return;
                 }
 
                 String clienteId = parts[2];
-                String payload = new String(message.getPayload());
+                String payload = new String(message.getPayload()).trim();
 
-                if (payload.startsWith("CODE:")) {
-                    String codigo = payload.substring(5);
-                    pagamentoAppService.validarCodigo(clienteId, codigo);
-                    System.out.println("Código IoT validado para cliente " + clienteId);
+                System.out.println("[MQTT] Payload recebido: " + payload);
+
+                if (!payload.startsWith("CODE:")) {
+                    System.err.println("[MQTT] Payload inválido. Esperado: CODE:XXXXXX");
+                    return;
                 }
 
+                String codigo = payload.substring(5);
+
+                // Chama o fluxo de validação no backend
+                pagamentoAppService.validarCodigo(clienteId, codigo);
+
+                System.out.println("[MQTT] Código validado com sucesso para cliente: " + clienteId);
+
             } catch (Exception e) {
-                e.printStackTrace(); // em produção, usar logger
+                System.err.println("[MQTT] Erro ao processar mensagem:");
+                e.printStackTrace();
             }
         });
 
-        System.out.println("MqttListener assinando tópicos: banco/validacao/+");
+        System.out.println("[MQTT] Listener ativo em: banco/validacao/+");
     }
 }

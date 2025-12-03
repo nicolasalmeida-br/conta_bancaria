@@ -84,9 +84,12 @@ public class ContaController {
                             schema = @Schema(implementation = ContaAtualizacaoDTO.class),
                             examples = @ExampleObject(name = "Exemplo de atualização", value = """
                                     {
-                                      "nomeTitular": "Maria Oliveira",
-                                      "tipoConta": "POUPANCA"
+                                       "saldo": 2000.00,
+                                       "limite": 800.00,
+                                       "rendimento": null,
+                                       "taxa": 0.02
                                     }
+                                    
                             """)
                     )
             ),

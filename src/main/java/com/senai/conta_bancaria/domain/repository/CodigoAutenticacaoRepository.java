@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface CodigoAutenticacaoRepository extends JpaRepository<CodigoAutenticacao, Long> {
-    Optional<CodigoAutenticacao> findTopByClienteOrderByIdDesc(Cliente cliente);
+public interface CodigoAutenticacaoRepository extends JpaRepository<CodigoAutenticacao, String> {
+
+    // pega o último código criado para o cliente, com base na data de expiração (mais recente)
+    Optional<CodigoAutenticacao> findTopByClienteOrderByExpiraEmDesc(Cliente cliente);
 }

@@ -42,13 +42,32 @@ public class ClienteController {
                             examples = @ExampleObject(
                                     name = "Exemplo de cadastro de cliente",
                                     value = """
-                                            {
-                                              "nome": "Ana Souza",
-                                              "cpf": "987.654.321-00",
-                                              "email": "ana.souza@email.com",
-                                              "telefone": "(11) 99999-8888",
-                                              "numeroConta": "12345-6"
-                                            }
+                                            [
+                                              {
+                                                "nome": "Ana Souza",
+                                                "cpf": "987.654.321-00",
+                                                "email": "ana.souza@email.com",
+                                                "telefone": "(11) 99999-8888",
+                                                "contaDTO": {
+                                                  "numero": "12345-6",
+                                                  "tipo": "CORRENTE",
+                                                  "saldo": 1000
+                                                },
+                                                "senha": "1234567"
+                                              },
+                                              {
+                                                "nome": "Ana Souza",
+                                                "cpf": "987.654.321-00",
+                                                "email": "ana.souza2@email.com",
+                                                "telefone": "(11) 98888-7777",
+                                                "contaDTO": {
+                                                  "numero": "98765-4",
+                                                  "tipo": "POUPANCA",
+                                                  "saldo": 2500
+                                                },
+                                                "senha": "abcdefg"
+                                              }
+                                            ]
                                             """
                             )
                     )

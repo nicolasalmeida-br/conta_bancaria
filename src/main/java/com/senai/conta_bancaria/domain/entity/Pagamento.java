@@ -14,22 +14,34 @@ import java.util.Set;
 public class Pagamento {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false, length = 36)
+    private String id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Conta conta;
 
+    @Column(nullable = false)
     private String boleto;
 
+    @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal valorPago;
 
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal valorFinal;
+
+    @Column(nullable = false)
     private LocalDateTime dataPagamento;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatusPagamento status;
 
     @ManyToMany
+    @JoinTable(
+            name = "pagamento_taxa",
+            joinColumns = @JoinColumn(name = "pagamento_id"),
+            inverseJoinColumns = @JoinColumn(name = "taxa_id")
+    )
     private Set<Taxa> taxas = new HashSet<>();
-
 }
