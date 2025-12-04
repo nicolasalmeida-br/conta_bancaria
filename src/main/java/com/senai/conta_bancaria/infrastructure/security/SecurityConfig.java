@@ -24,28 +24,45 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Endpoints públicos
-                        .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**","/api-docs/**").permitAll()
+                        // ============================
+                        // ENDPOINTS PÚBLICOS
+                        // ============================
+                        .requestMatchers("/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api-docs/**").permitAll()
 
-                        // Cliente endpoints
+                        // ============================
+                        // CLIENTE
+                        // ============================
                         .requestMatchers(HttpMethod.POST, "/api/cliente/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/cliente/**").hasAnyRole("ADMIN","CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/cliente/**").hasAnyRole("ADMIN", "CLIENTE")
 
-                        // Conta endpoints
+                        // ============================
+                        // CONTA
+                        // ============================
+                        // POST liberado para testes (criação de conta / operações no Postman sem token)
+                        .requestMatchers(HttpMethod.POST, "/api/conta/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/conta/**").hasAnyRole("CLIENTE", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/conta/**").hasRole("CLIENTE")
-                        .requestMatchers(HttpMethod.GET, "/api/conta/**").hasAnyRole("CLIENTE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/conta/**").hasAnyRole("CLIENTE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/conta/**").hasAnyRole("CLIENTE", "ADMIN")
 
-                        // Taxa endpoints
+                        // ============================
+                        // TAXAS
+                        // ============================
                         .requestMatchers(HttpMethod.POST, "/taxas/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/taxas/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/taxas/**").hasRole("ADMIN")
 
-                        // Taxa endpoints
+                        // ============================
+                        // PAGAMENTOS
+                        // ============================
                         .requestMatchers(HttpMethod.POST, "/pagamentos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/conta/**").hasAnyRole("ADMIN", "CLIENTE")
 
-                        // Demais endpoints precisam autenticação
+                        // ============================
+                        // QUALQUER OUTRA ROTA
+                        // ============================
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

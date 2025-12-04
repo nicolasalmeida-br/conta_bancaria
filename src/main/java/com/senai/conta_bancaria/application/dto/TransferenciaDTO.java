@@ -29,6 +29,6 @@ public record TransferenciaDTO(
         )
         @NotBlank(message = "A conta destino não pode ser vazia")
         @Size(min = 6, max = 20, message = "O número da conta destino deve ter entre 6 e 20 caracteres")
-        @Pattern(regexp = "^[0-9]+$", message = "O número da conta destino deve conter apenas números")
+        @Pattern(regexp = "^[0-9-]+$", message = "O número da conta destino deve conter apenas números e traço")
         String contaDestino
 ) {}
