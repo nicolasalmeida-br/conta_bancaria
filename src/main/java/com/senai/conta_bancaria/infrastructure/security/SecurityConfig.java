@@ -22,49 +22,65 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http.csrf(AbstractHttpConfigurer::disable)
+
                 .authorizeHttpRequests(auth -> auth
-                        // ============================
-                        // ENDPOINTS PÚBLICOS
-                        // ============================
-                        .requestMatchers("/auth/**",
+
+                        // ======================================
+                        // ENDPOINTS PÚBLICOS (IMPORTANTE: EM CIMA)
+                        // ======================================
+                        .requestMatchers(
+                                "/api/autenticacao/**",
+                                "/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api-docs/**").permitAll()
+                                "/api-docs/**"
+                        ).permitAll()
 
-                        // ============================
+                        // ======================================
                         // CLIENTE
-                        // ============================
-                        .requestMatchers(HttpMethod.POST, "/api/cliente/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/cliente/**").hasAnyRole("ADMIN", "CLIENTE")
+                        // ======================================
+                        .requestMatchers(HttpMethod.POST, "/api/cliente/**")
+                        .hasRole("ADMIN")
 
-                        // ============================
+                        .requestMatchers(HttpMethod.GET, "/api/cliente/**")
+                        .hasAnyRole("ADMIN", "GERENTE", "CLIENTE")
+
+                        // ======================================
                         // CONTA
-                        // ============================
-                        // POST liberado para testes (criação de conta / operações no Postman sem token)
-                        .requestMatchers(HttpMethod.POST, "/api/conta/**").permitAll()
+                        // ======================================
+                        .requestMatchers(HttpMethod.GET, "/api/conta/**")
+                        .hasAnyRole("ADMIN", "GERENTE", "CLIENTE")
 
-                        .requestMatchers(HttpMethod.GET, "/api/conta/**").hasAnyRole("CLIENTE", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/conta/**").hasRole("CLIENTE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/conta/**").hasAnyRole("CLIENTE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/conta/**")
+                        .hasRole("CLIENTE")
 
-                        // ============================
+                        .requestMatchers(HttpMethod.PUT, "/api/conta/**")
+                        .hasRole("CLIENTE")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/conta/**")
+                        .hasAnyRole("ADMIN", "GERENTE")
+
+                        // ======================================
                         // TAXAS
-                        // ============================
+                        // ======================================
                         .requestMatchers(HttpMethod.POST, "/taxas/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/taxas/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/taxas/**").hasRole("ADMIN")
 
-                        // ============================
+                        // ======================================
                         // PAGAMENTOS
-                        // ============================
-                        .requestMatchers(HttpMethod.POST, "/pagamentos/**").hasRole("ADMIN")
+                        // ======================================
+                        .requestMatchers(HttpMethod.POST, "/pagamentos/**")
+                        .hasRole("ADMIN")
 
-                        // ============================
-                        // QUALQUER OUTRA ROTA
-                        // ============================
+                        // ======================================
+                        // TODAS AS OUTRAS REQUISIÇÕES
+                        // ======================================
                         .anyRequest().authenticated()
                 )
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(usuarioDetailsService);
 
