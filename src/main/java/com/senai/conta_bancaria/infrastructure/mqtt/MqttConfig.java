@@ -13,32 +13,26 @@ public class MqttConfig {
     @Value("${mqtt.broker:tcp://localhost:1883}")
     private String broker;
 
-    @Value("${mqtt.clientId:conta-bancaria-backend}")
+    @Value("${mqtt.clientId:conta-bancaria}")
     private String clientId;
-
-    @Value("${mqtt.username:}")
-    private String username;
-
-    @Value("${mqtt.password:}")
-    private String password;
 
     @Bean
     public MqttClient mqttClient() throws Exception {
-        MqttClient client = new MqttClient(broker, clientId + "-" + System.currentTimeMillis(), new MemoryPersistence());
+
+        MqttClient client = new MqttClient(
+                broker,
+                clientId + "-" + System.currentTimeMillis(),
+                new MemoryPersistence()
+        );
 
         MqttConnectOptions options = new MqttConnectOptions();
-        options.setAutomaticReconnect(true);
         options.setCleanSession(true);
-
-        if (!username.isEmpty()) {
-            options.setUserName(username);
-        }
-        if (!password.isEmpty()) {
-            options.setPassword(password.toCharArray());
-        }
+        options.setAutomaticReconnect(true);
 
         client.connect(options);
+
         System.out.println("MQTT conectado ao broker: " + broker);
+
         return client;
     }
 }

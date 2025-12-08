@@ -6,7 +6,6 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -19,29 +18,143 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // ==========================
+    // REGRA NEGÓCIO: VALORES NEGATIVOS
+    // ==========================
     @ExceptionHandler(ValoresNegativosException.class)
-    public ProblemDetail handleValoresNegativos (ValoresNegativosException ex,
-                                                 HttpServletRequest request) {
+    public ProblemDetail handleValoresNegativos(
+            ValoresNegativosException ex,
+            HttpServletRequest request
+    ) {
         return ProblemDetailUtils.buildProblem(
                 HttpStatus.BAD_REQUEST,
-                "Valores negativos não são permitidos.",
+                "Valores negativos não são permitidos",
                 ex.getMessage(),
                 request.getRequestURI()
         );
     }
 
+    // ==========================
+    // REGRA NEGÓCIO: CONTA MESMO TIPO
+    // ==========================
     @ExceptionHandler(ContaMesmoTipoException.class)
-    public ResponseEntity<String> handleContaMesmoTipo (ContaMesmoTipoException ex) {
-        return  new  ResponseEntity <>(ex.getMessage(), HttpStatus.CONFLICT);
+    public ProblemDetail handleContaMesmoTipo(
+            ContaMesmoTipoException ex,
+            HttpServletRequest request
+    ) {
+        return ProblemDetailUtils.buildProblem(
+                HttpStatus.CONFLICT,
+                "Conta do mesmo tipo já existente",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
     }
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<String> handleException (Exception ex) {
-//        return  new  ResponseEntity <>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
 
+    // ==========================
+    // ENTIDADE NÃO ENCONTRADA (404)
+    // ==========================
+    @ExceptionHandler(EntidadeNaoEncontradaException.class)
+    public ProblemDetail handleEntidadeNaoEncontrada(
+            EntidadeNaoEncontradaException ex,
+            HttpServletRequest request
+    ) {
+        return ProblemDetailUtils.buildProblem(
+                HttpStatus.NOT_FOUND,
+                "Recurso não encontrado",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
 
+    // ==========================
+    // SALDO INSUFICIENTE
+    // ==========================
+    @ExceptionHandler(SaldoInsuficienteException.class)
+    public ProblemDetail handleSaldoInsuficiente(
+            SaldoInsuficienteException ex,
+            HttpServletRequest request
+    ) {
+        return ProblemDetailUtils.buildProblem(
+                HttpStatus.BAD_REQUEST,
+                "Saldo insuficiente",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
+
+    // ==========================
+    // PAGAMENTO INVÁLIDO
+    // ==========================
+    @ExceptionHandler(PagamentoInvalidoException.class)
+    public ProblemDetail handlePagamentoInvalido(
+            PagamentoInvalidoException ex,
+            HttpServletRequest request
+    ) {
+        return ProblemDetailUtils.buildProblem(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "Pagamento inválido",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
+
+    // ==========================
+    // RENDIMENTO INVÁLIDO
+    // ==========================
+    @ExceptionHandler(RendimentoInvalidoException.class)
+    public ProblemDetail handleRendimentoInvalido(
+            RendimentoInvalidoException ex,
+            HttpServletRequest request
+    ) {
+        return ProblemDetailUtils.buildProblem(
+                HttpStatus.BAD_REQUEST,
+                "Operação de rendimento inválida",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
+
+    // ==========================
+    // AUTENTICAÇÃO IoT EXPIRADA
+    // ==========================
+    @ExceptionHandler(AutenticacaoIoTExpiradaException.class)
+    public ProblemDetail handleAutenticacaoIoTExpirada(
+            AutenticacaoIoTExpiradaException ex,
+            HttpServletRequest request
+    ) {
+        return ProblemDetailUtils.buildProblem(
+                HttpStatus.UNAUTHORIZED,
+                "Autenticação IoT expirada",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
+
+    // ==========================
+    // AUTENTICAÇÃO IoT INVÁLIDA
+    // ==========================
+    @ExceptionHandler(AutenticacaoIoTInvalidaException.class)
+    public ProblemDetail handleAutenticacaoIoTInvalida(
+            AutenticacaoIoTInvalidaException ex,
+            HttpServletRequest request
+    ) {
+        return ProblemDetailUtils.buildProblem(
+                HttpStatus.UNAUTHORIZED,
+                "Autenticação IoT inválida",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
+
+    // ==========================
+    // ERROS DE VALIDAÇÃO @Valid (BODY)
+    // ==========================
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail badRequest(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ProblemDetail badRequest(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
         ProblemDetail problem = ProblemDetailUtils.buildProblem(
                 HttpStatus.BAD_REQUEST,
                 "Erro de validação",
@@ -51,17 +164,20 @@ public class GlobalExceptionHandler {
 
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors()
-                .forEach(error -> errors.put(
-                                error.getField(),
-                                error.getDefaultMessage()
-                        )
-                );
+                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
         problem.setProperty("errors", errors);
         return problem;
     }
+
+    // ==========================
+    // TIPO DE PARÂMETRO INVÁLIDO (ex: /api/conta/abc em vez de número)
+    // ==========================
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+    public ProblemDetail handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request
+    ) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Tipo de parâmetro inválido");
         problem.setDetail(String.format(
@@ -73,8 +189,15 @@ public class GlobalExceptionHandler {
         problem.setInstance(URI.create(request.getRequestURI()));
         return problem;
     }
+
+    // ==========================
+    // FALHA DE CONVERSÃO (path/query/body)
+    // ==========================
     @ExceptionHandler(ConversionFailedException.class)
-    public ProblemDetail handleConversionFailed(ConversionFailedException ex, HttpServletRequest request) {
+    public ProblemDetail handleConversionFailed(
+            ConversionFailedException ex,
+            HttpServletRequest request
+    ) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Falha de conversão de parâmetro");
         problem.setDetail("Um parâmetro não pôde ser convertido para o tipo esperado.");
@@ -83,8 +206,14 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
+    // ==========================
+    // VIOLAÇÃO DE CONSTRAINT (@NotNull, @Size em params etc.)
+    // ==========================
     @ExceptionHandler(ConstraintViolationException.class)
-    public ProblemDetail handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+    public ProblemDetail handleConstraintViolation(
+            ConstraintViolationException ex,
+            HttpServletRequest request
+    ) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Erro de validação nos parâmetros");
         problem.setDetail("Um ou mais parâmetros são inválidos");
@@ -100,24 +229,19 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    @ExceptionHandler(SaldoInsuficienteException.class)
-    public ResponseEntity<ProblemDetail> handleSaldo(SaldoInsuficienteException ex){
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        pd.setTitle("Saldo Insuficiente");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
-    }
-
-    @ExceptionHandler(AutenticacaoIoTExpiradaException.class)
-    public ResponseEntity<ProblemDetail> handleIoT(AutenticacaoIoTExpiradaException ex){
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
-        pd.setTitle("Autenticação IoT Expirada");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd);
-    }
-
-    @ExceptionHandler(PagamentoInvalidoException.class)
-    public ResponseEntity<ProblemDetail> handlePagamento(PagamentoInvalidoException ex){
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        pd.setTitle("Pagamento Inválido");
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(pd);
+    // ==========================
+    // EXCEÇÃO GENÉRICA (FALLBACK 500)
+    // ==========================
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleGeneric(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        return ProblemDetailUtils.buildProblem(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Erro interno no servidor",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
     }
 }

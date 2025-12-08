@@ -11,19 +11,15 @@ public class CodigoAutenticacao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false, length = 36)
     private String id;
 
-    @Column(nullable = false, length = 10)
     private String codigo;
 
-    @Column(nullable = false)
     private LocalDateTime expiraEm;
 
-    @Column(nullable = false)
-    private boolean validado;
+    private boolean validado = false;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 }
