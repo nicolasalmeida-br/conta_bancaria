@@ -31,7 +31,7 @@ public class CodigoAutenticacaoAppService {
     @Transactional
     public void iniciarAutenticacao(String clienteId) {
 
-        var dispositivo = dispositivoIoTRepository.findByClienteIdAndAtivoTrue(clienteId)
+        var dispositivo = dispositivoIoTRepository.findByCliente_IdAndAtivoTrue(clienteId)
                 .orElseThrow(() -> new AutenticacaoIoTExpiradaException());
 
         String codigo = gerarCodigo();
@@ -56,8 +56,8 @@ public class CodigoAutenticacaoAppService {
     public void validarCodigo(String clienteId, String codigoRecebido) {
 
         var codigo = codigoAutenticacaoRepository
-                .findFirstByClienteIdOrderByExpiraEmDesc(clienteId)
-                .orElseThrow(AutenticacaoIoTExpiradaException::new);
+                .findTopByCliente_IdOrderByExpiraEmDesc(clienteId)
+                .orElseThrow(() -> new RuntimeException("Nenhum código encontrado"));
 
         boolean expirado = codigo.getExpiraEm().isBefore(LocalDateTime.now());
         boolean diferente = !codigo.getCodigo().equals(codigoRecebido);
@@ -71,7 +71,7 @@ public class CodigoAutenticacaoAppService {
     }
 
     private String gerarCodigo() {
-        int num = 100000 + random.nextInt(900000); // 6 dígitos
+        int num = 100000 + random.nextInt(900000);
         return String.valueOf(num);
     }
 }

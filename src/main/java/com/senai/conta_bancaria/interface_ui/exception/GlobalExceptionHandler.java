@@ -1,6 +1,7 @@
 package com.senai.conta_bancaria.interface_ui.exception;
 
 import com.senai.conta_bancaria.domain.exceptions.*;
+import org.springframework.security.access.AccessDeniedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.core.convert.ConversionFailedException;
@@ -241,6 +242,22 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Erro interno no servidor",
                 ex.getMessage(),
+                request.getRequestURI()
+        );
+    }
+
+    // ==========================
+    // ACESSO NEGADO (403)
+    // ==========================
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(
+            AccessDeniedException ex,
+            HttpServletRequest request
+    ) {
+        return ProblemDetailUtils.buildProblem(
+                HttpStatus.FORBIDDEN,
+                "Acesso negado",
+                "Você não tem permissão para acessar este recurso.",
                 request.getRequestURI()
         );
     }

@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface DispositivoIoTRepository extends JpaRepository<DispositivoIoT, String> {
 
-    Optional<DispositivoIoT> findByClienteId(String clienteId);
+    // Busca o dispositivo ativo vinculado ao cliente
+    Optional<DispositivoIoT> findByCliente_IdAndAtivoTrue(String clienteId);
 }

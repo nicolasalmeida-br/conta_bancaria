@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface CodigoAutenticacaoRepository extends JpaRepository<CodigoAutenticacao, String> {
 
-    Optional<CodigoAutenticacao> findFirstByClienteIdOrderByExpiraEmDesc(String clienteId);
+    // Busca o último código gerado para o cliente (pelo campo cliente.id)
+    Optional<CodigoAutenticacao> findTopByCliente_IdOrderByExpiraEmDesc(String clienteId);
 }

@@ -25,12 +25,8 @@ public class AutenticacaoIoTAppService {
     @Transactional
     public void iniciarAutenticacao(String clienteId) {
 
-        var disp = dispositivoRepo.findByClienteId(clienteId)
+        var disp = dispositivoRepo.findByCliente_IdAndAtivoTrue(clienteId)
                 .orElseThrow(() -> new AutenticacaoIoTExpiradaException("Dispositivo não encontrado ou inativo."));
-
-        if (!disp.isAtivo()) {
-            throw new AutenticacaoIoTExpiradaException("Dispositivo IoT inativo.");
-        }
 
         String codigo = gerarCodigo();
         LocalDateTime expira = LocalDateTime.now().plusSeconds(45);
@@ -38,6 +34,7 @@ public class AutenticacaoIoTAppService {
         CodigoAutenticacao registro = new CodigoAutenticacao();
         registro.setCodigo(codigo);
         registro.setExpiraEm(expira);
+        registro.setValidado(false);
         registro.setCliente(disp.getCliente());
 
         codigoRepo.save(registro);
@@ -48,8 +45,8 @@ public class AutenticacaoIoTAppService {
     @Transactional
     public void validarCodigo(String clienteId, String recebido) {
 
-        var registro = codigoRepo.findFirstByClienteIdOrderByExpiraEmDesc(clienteId)
-                .orElseThrow(() -> new AutenticacaoIoTExpiradaException("Nenhum código gerado."));
+        var registro = codigoRepo.findTopByCliente_IdOrderByExpiraEmDesc(clienteId)
+                .orElseThrow(() -> new AutenticacaoIoTExpiradaException("Nenhum código gerado para este cliente."));
 
         domainService.validarCodigo(registro, recebido);
 

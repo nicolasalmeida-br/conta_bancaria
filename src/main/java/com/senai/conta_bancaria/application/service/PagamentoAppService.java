@@ -3,6 +3,9 @@ package com.senai.conta_bancaria.application.service;
 import com.senai.conta_bancaria.application.dto.PagamentoResumoDTO;
 import com.senai.conta_bancaria.domain.entity.*;
 import com.senai.conta_bancaria.domain.enums.StatusPagamento;
+import com.senai.conta_bancaria.domain.exceptions.AutenticacaoIoTExpiradaException;
+import com.senai.conta_bancaria.domain.exceptions.AutenticacaoIoTInvalidaException;
+import com.senai.conta_bancaria.domain.exceptions.EntidadeNaoEncontradaException;
 import com.senai.conta_bancaria.domain.repository.*;
 import com.senai.conta_bancaria.domain.service.PagamentoDomainService;
 import jakarta.persistence.EntityNotFoundException;
@@ -55,8 +58,15 @@ public class PagamentoAppService {
      */
     @Transactional
     public Map<String, Object> iniciarAutenticacao(String clienteId) {
+
+        if (clienteId == null || clienteId.isBlank()) {
+            throw new EntidadeNaoEncontradaException("Cliente não encontrado: id vazio");
+        }
+
         Cliente cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado: " + clienteId));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException(
+                        "Cliente não encontrado: " + clienteId
+                ));
 
         String codigo = gerarCodigoNumerico(6);
 
@@ -99,29 +109,31 @@ public class PagamentoAppService {
                 .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado: " + clienteId));
 
         CodigoAutenticacao ultimoCodigo = codigoAutenticacaoRepository
-                .findTopByClienteOrderByExpiraEmDesc(cliente)
-                .orElseThrow(() -> new EntityNotFoundException("Nenhum código de autenticação encontrado para o cliente."));
+                .findTopByCliente_IdOrderByExpiraEmDesc(clienteId)
+                .orElseThrow(() -> new AutenticacaoIoTExpiradaException(
+                        "Nenhum código de autenticação ativo encontrado para este cliente.")
+                );
 
+        // Já foi usado
         if (ultimoCodigo.isValidado()) {
-            System.out.println("[AUTENTICACAO] Código já foi validado anteriormente.");
-            return;
+            throw new AutenticacaoIoTInvalidaException("Este código IoT já foi utilizado.");
         }
 
+        // Expirado
         if (ultimoCodigo.getExpiraEm().isBefore(LocalDateTime.now())) {
-            System.out.println("[AUTENTICACAO] Código expirado para cliente " + clienteId);
-            return;
+            throw new AutenticacaoIoTExpiradaException("Código de autenticação IoT expirado.");
         }
 
+        // Não bate com o código recebido
         if (!ultimoCodigo.getCodigo().equals(codigoRecebido)) {
-            System.out.println("[AUTENTICACAO] Código inválido para cliente " + clienteId);
-            return;
+            throw new AutenticacaoIoTInvalidaException("Código IoT inválido para o cliente informado.");
         }
 
+        // Tudo ok → marca como validado
         ultimoCodigo.setValidado(true);
         codigoAutenticacaoRepository.save(ultimoCodigo);
 
         System.out.println("[AUTENTICACAO] Código validado com sucesso para cliente " + clienteId);
-        // Aqui você pode acionar alguma lógica extra (ex: liberar pagamento pendente).
     }
 
     private String gerarCodigoNumerico(int tamanho) {
@@ -139,7 +151,8 @@ public class PagamentoAppService {
 
     /**
      * Confirma o pagamento — aqui você pode, se quiser,
-     * conferir se o último código de autenticação do cliente foi validado.
+     * conferir se o último código de autenticação do cliente foi validado
+     * antes de debitar a conta.
      */
     @Transactional
     public PagamentoResumoDTO confirmarPagamento(
@@ -148,13 +161,18 @@ public class PagamentoAppService {
             String boleto,
             LocalDate dataVencimento,
             BigDecimal valorPrincipal,
-            java.util.List<Long> taxaIds
+            List<Long> taxaIds
     ) {
-        Conta conta = contaRepository.findById(contaId)
-                .orElseThrow(() -> new EntityNotFoundException("Conta não encontrada: " + contaId));
+        // contaId aqui é o NÚMERO da conta (ex: "12345-6")
+        Conta conta = contaRepository.findByNumeroAndAtivaTrue(contaId)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException(
+                        "Conta não encontrada ou inativa: " + contaId
+                ));
 
-        // (Opcional) validar que a conta pertence ao clienteId:
-        // if (!conta.getCliente().getId().equals(clienteId)) { ... }
+        // (Opcional) validar se a conta é do cliente passado
+        // if (!conta.getCliente().getId().equals(clienteId)) {
+        //     throw new PagamentoInvalidoException("Conta não pertence ao cliente informado.");
+        // }
 
         Set<Taxa> taxas = (taxaIds == null || taxaIds.isEmpty())
                 ? Set.of()
@@ -166,8 +184,6 @@ public class PagamentoAppService {
         pagamento.setValorPago(valorPrincipal != null ? valorPrincipal : BigDecimal.ZERO);
         pagamento.setTaxas(taxas);
         pagamento.setDataPagamento(LocalDateTime.now());
-
-        // Aqui você pode, se quiser, só permitir SUCESSO se o código de autenticação tiver sido validado
         pagamento.setStatus(StatusPagamento.SUCESSO);
 
         pagamentoDomainService.aplicarCalculoValorFinal(pagamento);

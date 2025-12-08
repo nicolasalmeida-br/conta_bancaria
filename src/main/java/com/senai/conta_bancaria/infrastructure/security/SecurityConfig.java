@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final UsuarioDetailsService usuarioDetailsService;
@@ -23,7 +25,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(AbstractHttpConfigurer::disable)
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // 🔹 IMPORTANTE PARA O H2: permitir uso de frames
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                )
 
                 .authorizeHttpRequests(auth -> auth
 
@@ -35,7 +43,9 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api-docs/**"
+                                "/api-docs/**",
+                                // 🔹 LIBERAR O CONSOLE DO H2
+                                "/h2-console/**"
                         ).permitAll()
 
                         // ======================================
@@ -69,11 +79,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/taxas/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/taxas/**").hasRole("ADMIN")
 
-                        // ======================================
+                        // ============================
                         // PAGAMENTOS
-                        // ======================================
-                        .requestMatchers(HttpMethod.POST, "/pagamentos/**")
-                        .hasRole("ADMIN")
+                        // ============================
+                        .requestMatchers(HttpMethod.POST, "/pagamentos/autenticacao").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/pagamentos/autenticacao/**").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/pagamentos/**").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/pagamentos/**").hasAnyRole("ADMIN", "GERENTE", "CLIENTE")
 
                         // ======================================
                         // TODAS AS OUTRAS REQUISIÇÕES

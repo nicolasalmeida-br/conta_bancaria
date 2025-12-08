@@ -26,7 +26,7 @@ public class PagamentoController {
 
     @PostMapping("/autenticacao")
     @PreAuthorize("hasRole('CLIENTE')")
-    public ResponseEntity<?> iniciarAutenticacao(@RequestBody IniciarAutenticacaoRequest req) {
+    public ResponseEntity<?> iniciarAutenticacao(@RequestBody @jakarta.validation.Valid IniciarAutenticacaoRequest req) {
         return ResponseEntity.ok(pagamentos.iniciarAutenticacao(req.clienteId));
     }
 
