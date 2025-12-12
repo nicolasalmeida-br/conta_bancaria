@@ -84,10 +84,10 @@ public class ContaController {
                             schema = @Schema(implementation = ContaAtualizacaoDTO.class),
                             examples = @ExampleObject(name = "Exemplo de atualização", value = """
                                     {
-                                       "saldo": 2000.00,
-                                       "limite": 800.00,
-                                       "rendimento": null,
-                                       "taxa": 0.02
+                                      "saldo": 2000.00,
+                                      "limite": 800.00,
+                                      "rendimento": null,
+                                      "taxa": 0.02
                                     }
                                     
                             """)
@@ -202,7 +202,7 @@ public class ContaController {
                             schema = @Schema(implementation = ValorSaqueDepositoDTO.class),
                             examples = @ExampleObject(name = "Exemplo de depósito", value = """
                                     {
-                                      "valor": 500.00
+                                      "valor": 200.00
                                     }
                             """)
                     )
@@ -248,7 +248,7 @@ public class ContaController {
                             schema = @Schema(implementation = TransferenciaDTO.class),
                             examples = @ExampleObject(name = "Exemplo de transferência", value = """
                                     {
-                                      "contaDestino": "987654",
+                                      "contaDestino": "98765-4",
                                       "valor": 300.00
                                     }
                             """)
